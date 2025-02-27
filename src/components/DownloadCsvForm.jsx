@@ -51,7 +51,7 @@ const localDate = new Date(defaultDate.getTime() - offset); // Adjust to local t
 
     try {
       // Make a POST request to get the filtered data
-      const response = await axios.post("http://localhost:8000/getData", {
+      const response = await axios.post("http://192.168.40.11:8000/getData", {
         from: fromDate,
         to: toDate,
       });
