@@ -4,14 +4,14 @@ import ShowAttendanceData from "./ShowAttendanceData";
 
 const DownloadCsvForm = () => {
 
-    const defaultDate = new Date();
-    defaultDate.setHours(5, 0, 0, 0); // Set time to 5:00 AM
+//     const defaultDate = new Date();
+//     defaultDate.setHours(5, 0, 0, 0); // Set time to 5:00 AM
 
-const offset = defaultDate.getTimezoneOffset() * 60000; // Get local timezone offset
-const localDate = new Date(defaultDate.getTime() - offset); // Adjust to local timezone
+// const offset = defaultDate.getTimezoneOffset() * 60000; // Get local timezone offset
+// const localDate = new Date(defaultDate.getTime() - offset); // Adjust to local timezone
 
 
-  const [fromDate, setFromDate] = useState(localDate.toISOString().slice(0, 16));;
+  const [fromDate, setFromDate] = useState("");;
   const [toDate, setToDate] = useState("");
   const [loading, setLoading] = useState(false);
   const [attendanceData, setAttendanceData] = useState([]); // State to store fetched data
