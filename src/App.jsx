@@ -11,7 +11,7 @@ function App() {
     setLoading(true);
     try {
       // Replace with the appropriate API endpoint that lists your available files
-      const response = await axios.get('http://localhost:8000/generated-files/');
+      const response = await axios.get('http://192.168.40.11:8000/generated-files/');
       setFiles(response.data.files); // Assuming the response contains a 'files' array
     } catch (error) {
       console.error('Error fetching files:', error);
@@ -23,7 +23,7 @@ function App() {
   // Download the file
   const downloadFile = async (fileName) => {
     try {
-      const response = await axios.get(`http://localhost:8000/generated-files/${fileName}`, {
+      const response = await axios.get(`http://192.168.40.11:8000/generated-files/${fileName}`, {
         responseType: 'blob', // Expect binary data
       });
       
