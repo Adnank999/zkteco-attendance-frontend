@@ -99,14 +99,17 @@
 
 // export default DownloadCsvForm;
 
-import React, { useState } from "react";
+import React, { useRef, useState } from "react";
 import axios from "axios";
 import ShowAttendanceData from "./ShowAttendanceData";
+import { gsap } from "gsap";
+import { Search, X } from "lucide-react";
 
 const DownloadCsvForm = () => {
   const [fromDate, setFromDate] = useState("");
   const [toDate, setToDate] = useState("");
   const [loading, setLoading] = useState(false);
+  const [isFocused, setIsFocused] = useState(false);
   const [attendanceData, setAttendanceData] = useState([]); // Stores all data
   const [searchQuery, setSearchQuery] = useState(""); // Stores search term
   const [page, setPage] = useState(1); // Current page
@@ -114,6 +117,55 @@ const DownloadCsvForm = () => {
   const [totalPages, setTotalPages] = useState(1); // Total pages from API
 
   // console.log("Attendance Data: ", attendanceData);
+
+  const searchIconRef = useRef(null);
+
+  const handleFocus = (e) => {
+    setIsFocused(true);
+
+    gsap.to(searchIconRef.current, {
+      duration: 0.3,
+      x: "-200px", // Move the icon to the left
+      ease: "power2.out",
+    });
+
+
+    gsap.to(e.target, {
+      duration: 0.3,
+      width: "200%", // Start with the default width
+      x: "-200px", // Move the input left by 200px
+      textAlign: "center",
+      borderRadius: "20px", // Set border-radius to 20px
+      borderWidth: "2px", // Set border width to 2px
+      borderColor: "#2563EB", // Change border color to blue
+      boxShadow: "0 0 10px rgba(37, 99, 235, 0.5)", // Add a glowing blue shadow
+      transformOrigin: "right", // Set origin to right side for expansion
+      ease: "power2.out", // Smooth easing
+    });
+  };
+
+  const handleBlur = (e) => {
+    setIsFocused(false);
+
+    gsap.to(searchIconRef.current, {
+      duration: 0.3,
+      x: "0px", // Move the icon back to its original position
+      ease: "power2.out",
+    });
+
+
+    
+    gsap.to(e.target, {
+      duration: 0.3,
+      width: "100%",
+      x: "50", // Shrink width back to normal
+      borderRadius: "4px", // Reset border-radius to normal
+      borderWidth: "1px", // Reset border width to 1px
+      borderColor: "#d1d5db", // Reset border color to gray (default)
+      boxShadow: "none", // Remove the glowing effect
+      ease: "power2.out", // Smooth easing
+    });
+  };
 
   const handleShowData = async (newPage = 1) => {
     setLoading(true);
@@ -135,6 +187,10 @@ const DownloadCsvForm = () => {
     } finally {
       setLoading(false);
     }
+  };
+
+  const clearSearch = () => {
+    setSearchQuery("");
   };
 
   // **Filter Data Based on Search Query**
@@ -209,17 +265,63 @@ const DownloadCsvForm = () => {
         </form>
 
         {/* Search Bar for Filtering by Name */}
-        {attendanceData.length > 0 && (
-          <div className="mt-4">
+        {/* {attendanceData.length > 0 && (
+          <div className="mt-4 mr-24 relative">
+            <div className="absolute left-0 top-0 transform -translate-y-1/2">
+              <Search className="text-gray-500" size={20} />
+            </div>
             <input
               type="text"
               placeholder="Search by user name..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
+              onFocus={handleFocus}
+              onBlur={handleBlur}
               className="w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none"
             />
+
+            {searchQuery && (
+              <div
+                className=" cursor-pointer"
+                onClick={clearSearch}
+              >
+                <X className="text-gray-500" size={20} />
+              </div>
+            )}
           </div>
-        )}
+        )} */}
+
+        <div className="mt-4 mr-24 ">
+          {attendanceData.length > 0 && (
+            <div className="relative">
+               <Search ref={searchIconRef} className="text-gray-500 absolute left-16 top-1/2 transform -translate-y-1/2" size={20} />
+              <input
+                type="text"
+                placeholder="Search by user name..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                onFocus={handleFocus}
+                onBlur={handleBlur}
+                className="w-full px-4 py-2 pl-10 pr-10 border border-gray-300 rounded-md shadow-sm focus:outline-none"
+              />
+
+              {/* Search Icon */}
+             
+               
+              
+
+              {/* Close Icon - Only show if searchQuery exists */}
+              {searchQuery && (
+                <div
+                  className="absolute right-3 top-1/2 transform -translate-y-1/2 cursor-pointer"
+                  onClick={clearSearch}
+                >
+                  <X color="#FF0000" className="text-gray-500" size={30} />
+                </div>
+              )}
+            </div>
+          )}
+        </div>
       </div>
 
       {/* Display Filtered Attendance Data */}
