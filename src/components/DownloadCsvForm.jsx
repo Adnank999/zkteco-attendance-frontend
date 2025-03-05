@@ -1,109 +1,14 @@
-// import React, { useState } from "react";
-// import axios from "axios";
-// import ShowAttendanceData from "./ShowAttendanceData";
 
-// const DownloadCsvForm = () => {
-
-//   const [fromDate, setFromDate] = useState("");;
-//   const [toDate, setToDate] = useState("");
-//   const [loading, setLoading] = useState(false);
-//   const [attendanceData, setAttendanceData] = useState([]); // State to store fetched data
-
-//   console.log("attendance, ", attendanceData);
-
-//   const handleShowData = async (e) => {
-//     e.preventDefault();
-//     setLoading(true);
-
-//     try {
-//       // Make a POST request to get the filtered data
-//       const response = await axios.post("http://localhost:8000/getData", {
-//         from: fromDate,
-//         to: toDate,
-//       });
-
-//       // Store the fetched data in state
-//       setAttendanceData(response.data);
-//     } catch (error) {
-//       console.error("Error fetching data:", error);
-//     } finally {
-//       setLoading(false);
-//     }
-//   };
-
-//   return (
-//     <div className=" pt-8 w-full relative">
-//       <h3 className="text-2xl font-bold text-center mb-6">
-//         Attendance Management
-//       </h3>
-//       <form
-//         onSubmit={handleShowData}
-//         className="bg-white p-6 rounded-lg shadow-lg w-fit flex flex-row items-start gap-4"
-//       >
-//         {/* From Date Input */}
-//         <div className="mb-4 flex flex-col items-start w-full">
-//           <label
-//             htmlFor="from-date"
-//             className="block text-sm font-medium text-gray-700"
-//           >
-//             From
-//           </label>
-//           <input
-//             type="datetime-local"
-//             id="from-date"
-//             name="from"
-//             value={fromDate}
-//             onChange={(e) => setFromDate(e.target.value)}
-//             required
-//             className="mt-1 w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-//           />
-//         </div>
-
-//         {/* To Date Input */}
-//         <div className="mb-6 flex flex-col items-start w-full">
-//           <label
-//             htmlFor="to-date"
-//             className="block text-sm font-medium text-gray-700"
-//           >
-//             To
-//           </label>
-//           <input
-//             type="datetime-local"
-//             id="to-date"
-//             name="to"
-//             value={toDate}
-//             onChange={(e) => setToDate(e.target.value)}
-//             required
-//             className="mt-1 w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-//           />
-//         </div>
-
-//         {/* Submit Button */}
-//         <button
-//           type="submit"
-//           disabled={loading}
-//           className={`w-full mt-6 py-2 px-4 bg-blue-500 text-white font-semibold rounded-lg shadow-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 ${
-//             loading ? "bg-gray-400" : "hover:bg-blue-600"
-//           }`}
-//         >
-//           {loading ? "Loading..." : "Show Data"}
-//         </button>
-//       </form>
-
-//       {attendanceData.length > 0 && !loading && (
-//         <ShowAttendanceData data={attendanceData} />
-//       )}
-//     </div>
-//   );
-// };
-
-// export default DownloadCsvForm;
 
 import React, { useRef, useState } from "react";
 import axios from "axios";
 import ShowAttendanceData from "./ShowAttendanceData";
 import { gsap } from "gsap";
 import { Search, X } from "lucide-react";
+import Papa from "papaparse";
+
+
+
 
 const DownloadCsvForm = () => {
   const [fromDate, setFromDate] = useState("");
@@ -117,6 +22,8 @@ const DownloadCsvForm = () => {
   const [totalPages, setTotalPages] = useState(1); // Total pages from API
 
   // console.log("Attendance Data: ", attendanceData);
+
+  // console.log("searchQuery: ", searchQuery);
 
   const searchIconRef = useRef(null);
 
@@ -177,6 +84,7 @@ const DownloadCsvForm = () => {
         from: fromDate,
         to: toDate,
         page: newPage,
+        exportAll: false,
         limit: limit,
       });
 
@@ -188,6 +96,44 @@ const DownloadCsvForm = () => {
       setLoading(false);
     }
   };
+
+
+  const handleExportAllData = async () => {
+    setLoading(true);
+    try {
+      const response = await axios.post("http://192.168.10.11:8000/getData", {
+        from: fromDate,
+        to: toDate,
+        exportAll: true, // Request all data
+      });
+  
+      // Call export function with complete data
+      const allData = response.data.data;
+
+      const filteredData = allData.filter((record) =>
+        record.name.toLowerCase().includes(searchQuery.toLowerCase())
+      );
+
+
+      exportToCsv(filteredData);
+    } catch (error) {
+      console.error("Error exporting all data:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+  
+  const exportToCsv = (dataToExport) => {
+    const csv = Papa.unparse(dataToExport.map((row, index) => ({ S_No: index + 1, ...row })));
+    const fileURL = window.URL.createObjectURL(new Blob([csv]));
+    const link = document.createElement("a");
+    link.href = fileURL;
+    link.download = "all_attendance_data.csv";
+    link.click();
+  };
+
+
+  
 
   const clearSearch = () => {
     setSearchQuery("");
@@ -326,7 +272,7 @@ const DownloadCsvForm = () => {
 
       {/* Display Filtered Attendance Data */}
       {filteredData.length > 0 && !loading && (
-        <ShowAttendanceData data={filteredData} />
+        <ShowAttendanceData data={filteredData} exportAllData={handleExportAllData}/>
       )}
 
       {/* Pagination Controls */}
