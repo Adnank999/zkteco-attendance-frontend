@@ -80,7 +80,7 @@ const DownloadCsvForm = () => {
 
     try {
       // Fetch paginated data from the API
-      const response = await axios.post("http://192.168.10.11:8000/getData", {
+      const response = await axios.post("http://localhost:8000/getData", {
         from: fromDate,
         to: toDate,
         page: newPage,
@@ -101,21 +101,44 @@ const DownloadCsvForm = () => {
   const handleExportAllData = async () => {
     setLoading(true);
     try {
-      const response = await axios.post("http://192.168.10.11:8000/getData", {
+      const response = await axios.post("http://localhost:8000/getData", {
         from: fromDate,
         to: toDate,
         exportAll: true, // Request all data
       });
-  
+
       // Call export function with complete data
       const allData = response.data.data;
+
+      // console.log("All Data: ", allData);
 
       const filteredData = allData.filter((record) =>
         record.name.toLowerCase().includes(searchQuery.toLowerCase())
       );
 
+      const groupedData = filteredData.reduce((acc, curr) => {
+        const key = `${curr.user_id}-${curr.date}`; // Unique key for each user per date
 
-      exportToCsv(filteredData);
+        if (!acc[key]) {
+          acc[key] = {
+            user_id: curr.user_id,
+            name: curr.name || "Unknown", // Handle missing name
+            date: curr.date,
+            start_time: curr.time, // First log of the day
+            end_time: curr.time, // Will update later
+          };
+        } else {
+          // Update end_time to the latest time of the day
+          acc[key].end_time = curr.time;
+        }
+
+        return acc;
+      }, {});
+
+      const finalData = Object.values(groupedData);
+      // console.log("Final Data: ", finalData);
+
+      exportToCsv(finalData);
     } catch (error) {
       console.error("Error exporting all data:", error);
     } finally {

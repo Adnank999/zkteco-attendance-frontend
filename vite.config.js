@@ -5,12 +5,11 @@ import path from "path"
 
 // https://vite.dev/config/
 export default defineConfig({
-  plugins: [react(), tailwindcss(),],
+  plugins: [react(), tailwindcss()],
   server: {
-    host: '192.168.10.11',
+    host: "0.0.0.0",
+    // host: '192.168.10.11',
     // host: '192.168.40.11',
-    port: 3001,  
+    port: 3001,
   },
-
- 
-})
+});
