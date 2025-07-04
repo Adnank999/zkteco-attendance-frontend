@@ -80,7 +80,7 @@ const DownloadCsvForm = () => {
 
     try {
       // Fetch paginated data from the API
-      const response = await axios.post("http://localhost:8000/getData", {
+      const response = await axios.post("http://192.168.10.11:8000/getData", {
         from: fromDate,
         to: toDate,
         page: newPage,
@@ -101,7 +101,7 @@ const DownloadCsvForm = () => {
   const handleExportAllData = async () => {
     setLoading(true);
     try {
-      const response = await axios.post("http://localhost:8000/getData", {
+      const response = await axios.post("http://192.168.10.11:8000/getData", {
         from: fromDate,
         to: toDate,
         exportAll: true, // Request all data
